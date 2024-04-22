@@ -34,7 +34,7 @@ class VideoDataset(Dataset):
 
     def __getitem__(self, idx):
         video_path = self.data[idx]
-        video, audio, info = read_video(video_path, include_audio=self.include_audio)
+        video, audio, info = read_video(video_path)
         if self.include_audio:
             return video, audio
         else:
