@@ -35,8 +35,14 @@ class VideoDataset(Dataset):
     def __getitem__(self, idx):
         video_path = self.data[idx]
         video, audio, info = read_video(video_path, include_audio=self.include_audio)
-        # You may need to do further preprocessing here depending on your requirements
         if self.include_audio:
             return video, audio
         else:
             return video
+        
+    def get_techniques(self):
+        techniques = set()
+        for video_path in self.data:
+            technique = os.path.basename(os.path.dirname(video_path))
+            techniques.add(technique)
+        return list(techniques)
