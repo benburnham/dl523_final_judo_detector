@@ -1,5 +1,13 @@
+'''
+Ben Burnham
+Demetrios Kechris
+
+April 22, 2024
+Deep Learning EC523
+Judo technique classification using pose tracking
+'''
+
 import torch
-import timm
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
@@ -47,6 +55,7 @@ def test(model, test_loader, criterion, device):
     accuracy = correct / total
     return accuracy
 
+
 # Define data loaders
 # data_dir = 'FINAL DATASET/'
 data_dir = '../../FINAL DATASET/'
@@ -70,19 +79,14 @@ print("Number of samples:", len(test_loader.dataset))
 # Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Define model parameters
-pose_detection_model = None
-pose_tracking_model = None
-lstm_model = None
-num_outputs = len(train_loader.dataset)     # Number of output classes (e.g., number of judo techniques)
-
 # Initialize model
-model = JudoTechniqueClassifier(pose_detection_model, pose_tracking_model, lstm_model, num_outputs)
+num_outputs = len(train_loader.dataset)     # Number of output classes (e.g., number of judo techniques)
+model = JudoTechniqueClassifier(num_outputs)
 model.to(device)
 
 # Define optimizer and loss function
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-criterion = torch.nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+criterion = nn.CrossEntropyLoss()
 
 # Training loop
 print("\n======================== Training started =========================")

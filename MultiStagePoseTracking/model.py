@@ -1,19 +1,27 @@
 import torch
 import timm
 import numpy as np
+from transformers import AutoImageProcessor, DeformableDetrForObjectDetection
+
 # import cv2  # For video processing
 
 class JudoTechniqueClassifier(torch.nn.Module):
-    def __init__(self, pose_detection_model, pose_tracking_model, lstm_model, num_outputs):
+    def __init__(self, num_outputs):
         super(JudoTechniqueClassifier, self).__init__()
-        self.pose_detection_model = pose_detection_model
-        self.pose_tracking_model = pose_tracking_model
-        self.lstm_model = lstm_model
+        # Person Detection: Deformable DETR model with ResNet-50 backbone
+        self.processor = AutoImageProcessor.from_pretrained("SenseTime/deformable-detr")
+        self.person_detection_model = DeformableDetrForObjectDetection.from_pretrained("SenseTime/deformable-detr")
+
+        # Pose Detection: 
+        self.pose_detection_model = None
+        self.pose_tracking_model = None
+        self.lstm_model = None
+
         self.num_outputs = num_outputs
     
     def forward(self, video):
         # Initialize variables
-        poses = []
+        # poses = []
         features = []
         
         # Loop through video frames
@@ -28,7 +36,7 @@ class JudoTechniqueClassifier(torch.nn.Module):
             pose_features = self.extract_features(tracked_poses)
             
             # Store the poses and features
-            poses.append(tracked_poses)
+            # poses.append(tracked_poses)
             features.append(pose_features)
         
         # Prepare data for LSTM classification
