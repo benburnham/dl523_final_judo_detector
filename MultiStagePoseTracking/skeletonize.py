@@ -5,7 +5,7 @@ import torch
 from PIL import Image
 
 # Load the video
-video_path = '../../FINAL DATASET/ALL/train/Uchi Mata/Uchi Mata_train_20.mp4'
+video_path = '../../FINAL DATASET/ALL/train/Uchi Mata/Uchi Mata_train_10.mp4'
 cap = cv2.VideoCapture(video_path)
 
 # Read the first frame
@@ -44,46 +44,53 @@ results = processor.post_process_object_detection(outputs, target_sizes=target_s
 
 for score, label, box in zip(results["scores"], results["labels"], results["boxes"]):
     box = [round(i, 2) for i in box.tolist()]
-    print(f"Detected {model.config.id2label[label.item()]} with confidence "
-          f"{round(score.item(), 3)} at location {box}")
+    if model.config.id2label[label.item()] == 'person':
+        print(f"Detected {model.config.id2label[label.item()]} with confidence "    
+              f"{round(score.item(), 3)} at location {box}")
+
+int_array = [int(x) for x in results["boxes"][0].detach().numpy()]
+x1, y1, x2, y2 = int_array
+image = cv2.imread('example.jpg')
+cv2.rectangle(image, (x1,y1), (x2,y2), color=(0, 255, 0), thickness=2   )
+cv2.imwrite("boxed_example.jpg", image)
 
 # Define the bounding box (x, y, width, height)
-print(results["boxes"][0].detach().numpy())
-print(int(results["boxes"][0].detach().numpy()))
-x, y, w, h = int(results["boxes"][0].detach().numpy())
-# Load the image
-image = cv2.imread('example.jpg')
+# out = results["boxes"][0].detach().numpy()
+# print(out)
+# print(int_array)
+# x, y, w, h = int_array
+# # Load the image
+# 
 
-# Create a mask
-mask = np.zeros_like(image[:, :, 0])
-mask[y:y+h, x:x+w] = 255
+# # Create a mask
+# mask = np.zeros_like(image[:, :, 0])
+# mask[y:y+h, x:x+w] = 255
 
-# Apply mask to the image
-person_masked = cv2.bitwise_and(image, image, mask=mask)
+# # Apply mask to the image
+# person_masked = cv2.bitwise_and(image, image, mask=mask)
 
+# # Binarize the image (convert to binary)
+# ret, binary_image = cv2.threshold(person_masked, 127, 255, cv2.THRESH_BINARY)
 
-# Binarize the image (convert to binary)
-ret, binary_image = cv2.threshold(person_masked, 127, 255, cv2.THRESH_BINARY)
+# # Invert the binary image
+# binary_image = cv2.bitwise_not(binary_image)
 
-# Invert the binary image
-binary_image = cv2.bitwise_not(binary_image)
+# # Apply skeletonization
+# size = np.size(binary_image)
+# skel = np.zeros(binary_image.shape, np.uint8)
+# element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3))
+# done = False
 
-# Apply skeletonization
-size = np.size(binary_image)
-skel = np.zeros(binary_image.shape, np.uint8)
-element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3))
-done = False
+# while not done:
+#     eroded = cv2.erode(binary_image, element)
+#     temp = cv2.dilate(eroded, element)
+#     temp = cv2.subtract(binary_image, temp)
+#     skel = cv2.bitwise_or(skel, temp)
+#     binary_image = eroded.copy()
 
-while not done:
-    eroded = cv2.erode(binary_image, element)
-    temp = cv2.dilate(eroded, element)
-    temp = cv2.subtract(binary_image, temp)
-    skel = cv2.bitwise_or(skel, temp)
-    binary_image = eroded.copy()
+#     zeros = size - cv2.countNonZero(binary_image)
+#     if zeros == size:
+#         done = True
 
-    zeros = size - cv2.countNonZero(binary_image)
-    if zeros == size:
-        done = True
-
-# Save the skeletonized image
-cv2.imwrite("skeletonized_image.jpg", skel)
+# # Save the skeletonized image
+# cv2.imwrite("skeletonized_image.jpg", skel)
