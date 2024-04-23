@@ -27,7 +27,7 @@ class JudoTechniqueClassifier(torch.nn.Module):
         # Loop through video frames
         for frame in video:
             # Perform person detection on the frame
-            keypoints = self.pose_detection_model.detect(frame)
+            keypoints = self.person_detections(frame)
             
             # Perform pose tracking on the detected keypoints
             tracked_poses = self.pose_tracking_model.track(keypoints)
