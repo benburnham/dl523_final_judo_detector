@@ -5,7 +5,7 @@
 #$ -N boxes
 #$ -j y
 #$ -o boxes.out
-#$ -pe omp 8
+#$ -pe omp 4
 #$ -l gpus=1
 #$ -l gpu_c=6.0
 
@@ -14,4 +14,4 @@
 # example:
 module load miniconda
 conda activate dl523
-python boxes.py
+python deformable_detr/bulk_box.py

@@ -1,7 +1,21 @@
-import cv2
 import numpy as np
 
 def find_closest_box(boxes, frame_width, frame_height):
+    center_x = frame_width // 2
+    center_y = frame_height // 2
+
+    box_centers_x = (boxes[:, 0, 0] + boxes[:, 1, 0]) // 2
+    box_centers_y = (boxes[:, 0, 1] + boxes[:, 1, 1]) // 2
+
+    distances = np.sqrt((box_centers_x - center_x)**2 + (box_centers_y - center_y)**2)
+    closest_indices = np.argsort(distances)
+
+    closest_box1 = boxes[closest_indices[0]]
+    closest_box2 = boxes[closest_indices[1]] if len(boxes) > 1 else None
+
+    return closest_box1, closest_box2
+
+def find_closest_box_slow(boxes, frame_width, frame_height):
     
     center_x = frame_width // 2
     center_y = frame_height // 2

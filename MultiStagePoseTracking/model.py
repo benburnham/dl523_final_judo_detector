@@ -9,8 +9,8 @@ class JudoTechniqueClassifier(torch.nn.Module):
     def __init__(self, num_outputs):
         super(JudoTechniqueClassifier, self).__init__()
         # Person Detection: Deformable DETR model with ResNet-50 backbone
-        # self.processor = AutoImageProcessor.from_pretrained("SenseTime/deformable-detr")
-        # self.person_detection_model = DeformableDetrForObjectDetection.from_pretrained("SenseTime/deformable-detr")
+        self.processor = AutoImageProcessor.from_pretrained("SenseTime/deformable-detr")
+        self.person_detection_model = DeformableDetrForObjectDetection.from_pretrained("SenseTime/deformable-detr")
 
         # Pose Detection: 
         self.pose_detection_model = None
@@ -23,10 +23,10 @@ class JudoTechniqueClassifier(torch.nn.Module):
         # Initialize variables
         # poses = []
         features = []
-        
+
         # Loop through video frames
         for frame in video:
-            # Perform pose detection on the frame
+            # Perform person detection on the frame
             keypoints = self.pose_detection_model.detect(frame)
             
             # Perform pose tracking on the detected keypoints
@@ -63,3 +63,32 @@ class JudoTechniqueClassifier(torch.nn.Module):
         # This may involve padding sequences, converting to tensor, etc.
         # Return the prepared data
         pass
+
+    def person_detections(self, frame):
+        inputs = self.processor(images=frame, return_tensors="pt")
+        # print("Shape of input:", inputs['pixel_values'].shape)
+        outputs = self.person_detection_model(**inputs)
+
+        # Convert outputs and keep detections with score > 0.7
+        target_sizes = torch.tensor(frame.size)
+        results =  self.processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=0.7)[0]
+
+        boxes = results["boxes"]
+        boxes = [int(i) for i in boxes.tolist()]
+
+        return self.find_closest_box(boxes, 1280, 720)
+
+    def find_closest_box(self, boxes, frame_width, frame_height):
+        center_x = frame_width // 2
+        center_y = frame_height // 2
+
+        box_centers_x = (boxes[:, 0, 0] + boxes[:, 1, 0]) // 2
+        box_centers_y = (boxes[:, 0, 1] + boxes[:, 1, 1]) // 2
+
+        distances = np.sqrt((box_centers_x - center_x)**2 + (box_centers_y - center_y)**2)
+        closest_indices = np.argsort(distances)
+
+        closest_box1 = boxes[closest_indices[0]]
+        closest_box2 = boxes[closest_indices[1]] if len(boxes) > 1 else None
+
+        return closest_box1, closest_box2 
