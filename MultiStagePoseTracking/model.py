@@ -9,8 +9,8 @@ class JudoTechniqueClassifier(torch.nn.Module):
     def __init__(self, num_outputs):
         super(JudoTechniqueClassifier, self).__init__()
         # Person Detection: Deformable DETR model with ResNet-50 backbone
-        self.processor = AutoImageProcessor.from_pretrained("SenseTime/deformable-detr")
-        self.person_detection_model = DeformableDetrForObjectDetection.from_pretrained("SenseTime/deformable-detr")
+        # self.processor = AutoImageProcessor.from_pretrained("SenseTime/deformable-detr")
+        # self.person_detection_model = DeformableDetrForObjectDetection.from_pretrained("SenseTime/deformable-detr")
 
         # Pose Detection: 
         self.pose_detection_model = None

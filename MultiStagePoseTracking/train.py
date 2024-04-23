@@ -20,6 +20,7 @@ def train(model, train_loader, optimizer, criterion, device, epoch, num_epochs):
     running_loss = 0.0
     i = 0
     for videos, labels in train_loader:
+        print(labels)
         videos, labels = videos.to(device), labels.to(device)
         optimizer.zero_grad()
         outputs = model(videos)
@@ -85,7 +86,8 @@ model = JudoTechniqueClassifier(num_outputs)
 model.to(device)
 
 # Define optimizer and loss function
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+# optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = None
 criterion = nn.CrossEntropyLoss()
 
 # Training loop
