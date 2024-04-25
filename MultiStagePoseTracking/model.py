@@ -1,19 +1,30 @@
 import torch
-import timm
 import numpy as np
-from transformers import AutoImageProcessor, DeformableDetrForObjectDetection
+from mmpose.apis import MMPoseInferencer
+
+# import timm
+# from transformers import AutoImageProcessor, DeformableDetrForObjectDetection
 
 # import cv2  # For video processing
 
 class JudoTechniqueClassifier(torch.nn.Module):
     def __init__(self, num_outputs):
         super(JudoTechniqueClassifier, self).__init__()
-        # Person Detection: Deformable DETR model with ResNet-50 backbone
-        self.processor = AutoImageProcessor.from_pretrained("SenseTime/deformable-detr")
-        self.person_detection_model = DeformableDetrForObjectDetection.from_pretrained("SenseTime/deformable-detr")
+        # # Person Detection: Deformable DETR model with ResNet-50 backbone
+        # self.processor = AutoImageProcessor.from_pretrained("SenseTime/deformable-detr")
+        # self.person_detection_model = DeformableDetrForObjectDetection.from_pretrained("SenseTime/deformable-detr")
 
         # Pose Detection: 
-        self.pose_detection_model = None
+        det_model='mmpose/configs/body_2d_keypoint/rtmo/coco/rtmo-l_16xb16-600e_coco-640x640.py'
+        det_weights='../../rtmo-l_16xb16-600e_coco-640x640-516a421f_20231211.pth'
+        
+        self.pose_detection_model = MMPoseInferencer(
+            pose2d='rtmo',
+            det_model=det_model, 
+            det_weights=det_weights,
+            det_cat_ids=[0]  # the category id of 'human' class
+        )
+
         self.pose_tracking_model = None
         self.lstm_model = None
 
@@ -27,7 +38,8 @@ class JudoTechniqueClassifier(torch.nn.Module):
         # Loop through video frames
         for frame in video:
             # Perform person detection on the frame
-            keypoints = self.person_detections(frame)
+            predictions = next(self.pose_detection_model(frame))
+            keypoints = [prediction['keypoints'] for prediction in predictions['predictions'][0]]
             
             # Perform pose tracking on the detected keypoints
             tracked_poses = self.pose_tracking_model.track(keypoints)

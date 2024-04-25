@@ -10,17 +10,17 @@ img_path = 'poseTracking/example.jpg'
 config_file = 'mmpose/configs/body_2d_keypoint/rtmo/coco/rtmo-l_16xb16-600e_coco-640x640.py'
 checkpoint_file ='../../rtmo-l_16xb16-600e_coco-640x640-516a421f_20231211.pth'
 
-model = init_model(config_file, checkpoint_file, device='cpu')  # or device='cuda:0'
+# model = init_model(config_file, checkpoint_file, device='cpu')  # or device='cuda:0'
 
-# please prepare an image with person
-batch_results = inference_topdown(model, img_path)
-print(batch_results[0].pred_instances['keypoints'])
-print(batch_results)
+# # please prepare an image with person
+# batch_results = inference_topdown(model, img_path)
+# print(batch_results[0].pred_instances['keypoints'])
+# print(batch_results)
 
 # # merge results as a single data sample
 # results = merge_data_samples(batch_results)
 
-# img = imread(img_path, channel_order='rgb')
+img = imread(img_path, channel_order='rgb')
 # pose_local_visualizer = PoseLocalVisualizer()
 # pose_local_visualizer.add_datasample('image', img, results, out_file='out_file.jpg')
 
@@ -34,10 +34,28 @@ print(batch_results)
 # build the inferencer with model config path and checkpoint path/URL
 # inferencer = MMPoseInferencer(
 #     pose2d='mmpose/configs/body_2d_keypoint/rtmo/coco/rtmo-l_16xb16-600e_coco-640x640.py',
-#     pose2d_weights='../../rtmo-l_16xb16-600e_coco-640x640-516a421f_20231211.pth'
+#     pose2d_weights='../../rtmo-l_16xb16-600e_coco-640x640-516a421f_20231211.pth',
+#     det_cat_ids=[0],  # the category id of 'human' class
 # )
+inferencer = MMPoseInferencer(
+    pose2d='rtmo',
+    det_model='mmpose/configs/body_2d_keypoint/rtmo/coco/rtmo-l_16xb16-600e_coco-640x640.py',
+    det_weights='../../rtmo-l_16xb16-600e_coco-640x640-516a421f_20231211.pth',
+    det_cat_ids=[0],  # the category id of 'human' class
+)
 
-# result_generator = inferencer(img_path, out_dir='poseTracking')
-# # result = next(result_generator)
+result_generator = next(inferencer(img))
+# result_generator = inferencer(img_path, draw_bbox=True, out_dir='poseTracking')
+# result = next(result_generator)
+result = result_generator
+# keypoints = []
+# for prediction in result['predictions'][0]:
+#     print('next pred')
+#     print(prediction['keypoints'])
+#     keypoints.append(prediction['keypoints'])
+keypoints = [prediction['keypoints'] for prediction in result['predictions'][0]]
+print(keypoints)
+print(len(result['predictions'][0]))
+
 # results = [result for result in result_generator]
 
