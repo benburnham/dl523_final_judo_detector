@@ -36,16 +36,16 @@ img_path = '../../FINAL DATASET/ALL/train/Uchi Mata/Uchi Mata_train_10.mp4'
 
 
 # build the inferencer with model alias
-inferencer = MMPoseInferencer('rtmo')
+# inferencer = MMPoseInferencer('rtmo')
 
 # build the inferencer with model config name
 # inferencer = MMPoseInferencer('rtmo-l_16xb16-600e_coco-640x640')
 
-# # build the inferencer with model config path and checkpoint path/URL
-# inferencer = MMPoseInferencer(
-#     pose2d='mmpose/configs/body_2d_keypoint/rtmo/coco/rtmo-l_16xb16-600e_coco-640x640.py',
-#     pose2d_weights='poseTracking/rtmo-l_16xb16-600e_coco-640x640-516a421f_20231211.pth'
-# )
+# build the inferencer with model config path and checkpoint path/URL
+inferencer = MMPoseInferencer(
+    pose2d='mmpose/configs/body_2d_keypoint/rtmo/coco/rtmo-l_16xb16-600e_coco-640x640.py',
+    pose2d_weights='../../rtmo-l_16xb16-600e_coco-640x640-516a421f_20231211.pth'
+)
 
 result_generator = inferencer(img_path, out_dir='poseTracking')
 # result = next(result_generator)
