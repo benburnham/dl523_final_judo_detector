@@ -39,7 +39,7 @@ def update_kalman_filter(kf, detected_pose):
 
 # Main function
 def main():
-    cap = cv2.VideoCapture('../../FINAL DATASET/ALL/train/Uchi Mata/Uchi Mata_train_23.mp4')  # Replace 'input_video.mp4' with your video file
+    cap = cv2.VideoCapture('../../FINAL DATASET/ALL/train/Uchi Mata/Uchi Mata_train_28.mp4')  # Replace 'input_video.mp4' with your video file
     output_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     output_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
