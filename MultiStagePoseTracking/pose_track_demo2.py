@@ -39,11 +39,11 @@ def update_kalman_filter(kf, detected_pose):
 
 # Main function
 def main():
-    cap = cv2.VideoCapture('../../FINAL DATASET/ALL/train/Uchi Mata/Uchi Mata_train_93.mp4')  # Replace 'input_video.mp4' with your video file
+    cap = cv2.VideoCapture('../../FINAL DATASET/ALL/train/Uchi Mata/Uchi Mata_train_111.mp4')  # Replace 'input_video.mp4' with your video file
     output_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     output_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
-    out = cv2.VideoWriter('KM_demo_4.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (output_width, output_height))
+    out = cv2.VideoWriter('KM_demo_6.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (output_width, output_height))
 
     kf_list = []  # List to store Kalman filters for each pose
     pose_id = 0
@@ -107,20 +107,22 @@ def main():
 
         # Visualization logic (Drawing detected poses and IDs)
         sizes = []  # Array to store sizes of poses
-        for pose in detected_poses:
+        for kf in kf_list:
+            # Get the predicted pose from Kalman filter
+            predicted_pose = kf.x[:2].astype(int)
             # Calculate size of each pose (sum of distances between keypoints)
-            size = sum(euclidean_distance(pose[i], pose[i+1]) for i in range(len(pose)-1))
+            size = sum(euclidean_distance(pose[i], pose[i+1]) for i, pose in enumerate(detected_poses))
             sizes.append(size)
 
         # Sort sizes and get indices of the two largest sizes
         largest_indices = np.argsort(sizes)[-2:]
 
-        for i, pose in enumerate(detected_poses):
-            predicted_pose = pose[0]
+        for i, kf in enumerate(kf_list):
+            predicted_pose = kf.x[:2].astype(int)
             color = (0, 255, 0)  # Default color is green
             if i in largest_indices:
                 color = (255, 0, 0)  # Color is blue for the two largest poses
-            cv2.circle(frame, tuple(map(int, predicted_pose)), 5, color, -1)
+            cv2.circle(frame, tuple(predicted_pose), 5, color, -1)
 
         out.write(frame)  # Write frame to output video
 
