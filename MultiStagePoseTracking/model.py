@@ -1,15 +1,17 @@
 import torch
+import torch.nn as nn
 import numpy as np
 from mmpose.apis import MMPoseInferencer
 
 # import timm
 # from transformers import AutoImageProcessor, DeformableDetrForObjectDetection
-
 # import cv2  # For video processing
 
 class JudoTechniqueClassifier(torch.nn.Module):
-    def __init__(self, num_outputs):
+    def __init__(self, hidden_dim, layer_dim, num_outputs):
         super(JudoTechniqueClassifier, self).__init__()
+        self.num_outputs = num_outputs
+
         # # Person Detection: Deformable DETR model with ResNet-50 backbone
         # self.processor = AutoImageProcessor.from_pretrained("SenseTime/deformable-detr")
         # self.person_detection_model = DeformableDetrForObjectDetection.from_pretrained("SenseTime/deformable-detr")
@@ -17,7 +19,6 @@ class JudoTechniqueClassifier(torch.nn.Module):
         # Pose Detection: 
         det_model='mmpose/configs/body_2d_keypoint/rtmo/coco/rtmo-l_16xb16-600e_coco-640x640.py'
         det_weights='../../rtmo-l_16xb16-600e_coco-640x640-516a421f_20231211.pth'
-        
         self.pose_detection_model = MMPoseInferencer(
             pose2d='rtmo',
             det_model=det_model, 
@@ -25,31 +26,37 @@ class JudoTechniqueClassifier(torch.nn.Module):
             det_cat_ids=[0]  # the category id of 'human' class
         )
 
-        self.pose_tracking_model = None
-        self.lstm_model = None
-
-        self.num_outputs = num_outputs
+        # LSTM Claasification
+        self.hidden_dim = hidden_dim
+        self.layer_dim = layer_dim
+        self.lstm = nn.Sequential(
+            nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True),
+            nn.Linear(hidden_dim, num_outputs)
+        )
     
     def forward(self, video):
-        # Initialize variables
-        # poses = []
-        features = []
+        # get poses
+        detection_generator = self.pose_detection_model(video)
+        detections = [result for result in detection_generator]
 
-        # Loop through video frames
-        for frame in video:
-            # Perform person detection on the frame
-            predictions = next(self.pose_detection_model(frame))
-            keypoints = [prediction['keypoints'] for prediction in predictions['predictions'][0]]
+
+        # # Loop through video frames
+        # for frame in video:
+        #     # Perform person detection on the frame
+        #     predictions = next()
+        #     keypoints = [prediction['keypoints'] for prediction in predictions['predictions'][0]]
             
-            # Perform pose tracking on the detected keypoints
-            tracked_poses = self.pose_tracking_model.track(keypoints)
+        #     # Perform pose tracking on the detected keypoints
+        #     tracked_poses = self.pose_tracking_model.track(keypoints)
             
-            # Extract features from the tracked poses
-            pose_features = self.extract_features(tracked_poses)
+        #     # Extract features from the tracked poses
+        #     pose_features = self.extract_features(tracked_poses)
             
-            # Store the poses and features
-            # poses.append(tracked_poses)
-            features.append(pose_features)
+        #     # Store the poses and features
+        #     # poses.append(tracked_poses)
+        #     features.append(pose_features)
+
+
         
         # Prepare data for LSTM classification
         lstm_input = self.prepare_lstm_input(features)
