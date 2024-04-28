@@ -56,8 +56,9 @@ def obj_assign(frame_list):
 
         # reshape to 2,1
         # ValueError: could not broadcast input array from shape (2,) into shape (2,1)
-        kf.x[:2] = [x, y]
-        kf.x[2:] = [0, 0]
+        # kf.x[:2] = [x, y]
+        kf.x[:2] = averages
+        kf.x[2:] = np.array([0, 0])
 
         pose_frame_data.append({
             'id': unique_id,
