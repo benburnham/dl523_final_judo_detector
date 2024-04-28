@@ -49,23 +49,22 @@ class JudoTechniqueClassifier(torch.nn.Module):
         for frame in detections:
             frame_detections = frame['predictions'][0]
 
-            # If more than one pose detected, take two largest poses
-            if len(frame_detections) > 1:
-                frame_detections.sort(key=lambda x: (x['bbox'][0][2] - x['bbox'][0][0]) * (x['bbox'][0][3] - x['bbox'][0][1]), reverse=True)
-                pose1_seq.append(torch.tensor(frame_detections[0]['keypoints']).to(self.device))
-                pose2_seq.append(torch.tensor(frame_detections[1]['keypoints']).to(self.device))
+            # Sort detections by bounding box size
+            frame_detections.sort(key=lambda x: (x['bbox'][0][2] - x['bbox'][0][0]) * (x['bbox'][0][3] - x['bbox'][0][1]), reverse=True)
 
-            # If only one pose detected, assign to both sequences
-            elif len(frame_detections) == 1:
-                pose1_seq.append(torch.tensor(frame_detections[0]['keypoints']).to(self.device))
-                pose2_seq.append(torch.tensor(frame_detections[0]['keypoints']).to(self.device))
+            # Extract keypoints and convert to torch tensors
+            keypoints = [torch.tensor(det['keypoints']).to(self.device) for det in frame_detections]
 
-            # If none are detected, skip
-            else:
-                pass
+            # Append keypoints to sequences
+            # if >1, each seq gets its own
+            # if 1, both seq get it
+            # if none, skips
+            if keypoints:
+                pose1_seq.append(keypoints[0])
+                pose2_seq.append(keypoints[1] if len(keypoints) > 1 else keypoints[0])
 
+        # Prepare LSTM input using pose sequences
         lstm_input = self.prepare_lstm_input(pose1_seq, pose2_seq)
-        # print(lstm_input.shape)
 
         # Initialize hidden state and cell state with zeros
         h0 = torch.zeros(self.layer_dim, lstm_input.size(0), self.hidden_dim).to(self.device)
@@ -73,10 +72,13 @@ class JudoTechniqueClassifier(torch.nn.Module):
         
         # Forward propagate LSTM
         lstm_out, _ = self.lstm(lstm_input, (h0, c0))
-        lstm_out = self.dropout(lstm_out)       # Add dropout
+
+        # Dropout and average the sequence
+        lstm_out = self.dropout(lstm_out)
         lstm_out = torch.mean(lstm_out, dim=(0, 1), keepdim=True)
-        predictions = self.fc(lstm_out)    # Linear layer
-        
+
+        # Linear layer and return predictions
+        predictions = self.fc(lstm_out)
         return predictions
     
     def prepare_lstm_input(self, pose1_seq, pose2_seq):
@@ -92,30 +94,24 @@ class JudoTechniqueClassifier(torch.nn.Module):
         return lstm_input
 
     def class_to_classID(self, technique):
-        # 'Osoto Gari'  'Seoi Nage'  'Uchi Mata'
-        one_hot = torch.zeros(self.num_outputs).to(self.device)
-        if technique == 'Osoto Gari':
-            one_hot[0] = 1
-        elif technique == 'Seoi Nage':
-            one_hot[1] = 1
-        elif technique == 'Uchi Mata':
-            one_hot[2] = 1
-
-        return one_hot.unsqueeze(0)
+        technique_to_id = {'Osoto Gari': 0, 'Seoi Nage': 1, 'Uchi Mata': 2}
+        class_id = technique_to_id.get(technique, -1)
+        if class_id != -1:
+            one_hot = torch.zeros(self.num_outputs, device=self.device)
+            one_hot[class_id] = 1
+            return one_hot.unsqueeze(0)
+        else:
+            print('technique not in list')
+            return None
     
     def classID_to_class(self, predictions):
         # class dictionary
-        class_mapping_reverse = {
-            0: 'Osoto Gari',
-            1: 'Seoi Nage',
-            2: 'Uchi Mata'
-        }
+        class_mapping_reverse = {0: 'Osoto Gari', 1: 'Seoi Nage', 2: 'Uchi Mata'}
 
-        # get highest prediction and get technique name
+        # Get technique name for given prediction
         predictions = self.softmax(predictions)
         classID = torch.argmax(predictions).item()
         return class_mapping_reverse[classID]
-
         
         # # Look at detections in each frame
         # for frame in detections:
