@@ -4,7 +4,7 @@ import torch
 from PIL import Image
 
 # Open the input video
-video_path = '../../FINAL DATASET/ALL/train/Uchi Mata/Uchi Mata_train_10.mp4'
+video_path = '../../FINAL DATASET/ALL/train/Uchi Mata/Uchi Mata_train_111.mp4'
 input_video = cv2.VideoCapture(video_path)
 
 # Get video properties
@@ -39,7 +39,7 @@ while ret:
     # convert outputs (bounding boxes and class logits) to COCO API
     # let's only keep detections with score > 0.7
     target_sizes = torch.tensor([pil_image.size[::-1]])
-    results =  processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=0.7)[0]
+    results =  processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=0.5)[0]
 
     for score, label, box in zip(results["scores"], results["labels"], results["boxes"]):
         box = [round(i, 2) for i in box.tolist()]

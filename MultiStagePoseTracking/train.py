@@ -18,13 +18,20 @@ from model import JudoTechniqueClassifier
 def train(model, train_loader, optimizer, criterion, device, epoch, num_epochs):
     model.train()
     running_loss = 0.0
-    i = 0
-    for videos, labels in train_loader:
-        print(labels)
-        videos, labels = videos.to(device), labels.to(device)
+    # i = 0
+    for i, (videos, labels) in enumerate(train_loader):
+        print(videos[0])
+        print('Label: ', labels[0])
+
+        classID = model.class_to_classID(labels[0])
+        # print(classID)
+        
+        # videos, labels = videos.to(device), labels.to(device)
         optimizer.zero_grad()
-        outputs = model(videos)
-        loss = criterion(outputs, labels)
+        output = model(videos[0])
+        print('Prediction: ', model.classID_to_class(output))
+
+        loss = criterion(output, classID)
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
@@ -60,11 +67,11 @@ def test(model, test_loader, criterion, device):
 # Define data loaders
 # data_dir = 'FINAL DATASET/'
 data_dir = '../../FINAL DATASET/'
-train_dataset = VideoDataset(data_dir, mode='train', include_mirror=True, include_audio=False)
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=4)
+train_dataset = VideoDataset(data_dir, mode='train', include_mirror=True)
+train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=4)
 
-test_dataset = VideoDataset(data_dir, mode='evaluate', include_mirror=True, include_audio=False)
-test_loader = DataLoader(test_dataset, batch_size=8, shuffle=True, num_workers=4)
+test_dataset = VideoDataset(data_dir, mode='evaluate', include_mirror=True)
+test_loader = DataLoader(test_dataset, batch_size=1, shuffle=True, num_workers=4)
 
 # Print DataLoader stats
 possible_techniques = train_dataset.get_techniques()
@@ -81,13 +88,15 @@ print("Number of samples:", len(test_loader.dataset))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Initialize model
-num_outputs = len(train_loader.dataset)     # Number of output classes (e.g., number of judo techniques)
-model = JudoTechniqueClassifier(num_outputs)
+model = JudoTechniqueClassifier(
+    hidden_dim=256,
+    layer_dim=3,
+    num_outputs=3   # 'Osoto Gari'  'Seoi Nage'  'Uchi Mata'
+    )
 model.to(device)
 
 # Define optimizer and loss function
-# optimizer = optim.Adam(model.parameters(), lr=0.001)
-optimizer = None
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 criterion = nn.CrossEntropyLoss()
 
 # Training loop
@@ -101,3 +110,7 @@ print("\n======================== Training finished ========================\n\n
 # Testing loop
 test_accuracy = test(model, test_loader, criterion, device)
 print(f"\nTest Accuracy: {test_accuracy:.2f}")
+
+best_model_path = '../../'
+
+torch.save(model.state_dict(), best_model_path)

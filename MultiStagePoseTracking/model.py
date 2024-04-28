@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from mmpose.apis import MMPoseInferencer
+from sklearn.preprocessing import MinMaxScaler
 
 # import timm
 # from transformers import AutoImageProcessor, DeformableDetrForObjectDetection
@@ -17,8 +18,10 @@ class JudoTechniqueClassifier(torch.nn.Module):
         # self.person_detection_model = DeformableDetrForObjectDetection.from_pretrained("SenseTime/deformable-detr")
 
         # Pose Detection: 
-        det_model='mmpose/configs/body_2d_keypoint/rtmo/coco/rtmo-l_16xb16-600e_coco-640x640.py'
-        det_weights='../../rtmo-l_16xb16-600e_coco-640x640-516a421f_20231211.pth'
+        # det_model='mmpose/configs/body_2d_keypoint/rtmo/coco/rtmo-l_16xb16-600e_coco-640x640.py'
+        # det_weights='../../rtmo-l_16xb16-600e_coco-640x640-516a421f_20231211.pth'
+        det_model='mmpose/configs/body_2d_keypoint/rtmo/body7/rtmo-l_16xb16-600e_body7-640x640.py',
+        det_weights='../../rtmo-l_16xb16-600e_body7-640x640-b37118ce_20231211.pth',
         self.pose_detection_model = MMPoseInferencer(
             pose2d='rtmo',
             det_model=det_model, 
@@ -27,19 +30,87 @@ class JudoTechniqueClassifier(torch.nn.Module):
         )
 
         # LSTM Claasification
+        # Input: 2 pose sequences
+        input_dim = 2  
         self.hidden_dim = hidden_dim
         self.layer_dim = layer_dim
-        self.lstm = nn.Sequential(
+        self.lstm_model = nn.Sequential(
             nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True),
             nn.Linear(hidden_dim, num_outputs)
         )
+
+        # Softmax activation for classification
+        self.softmax = nn.Softmax(dim=1)
     
     def forward(self, video):
-        # get poses
+        # Get poses
         detection_generator = self.pose_detection_model(video)
         detections = [result for result in detection_generator]
+        
+        pose1_seq = []
+        pose2_seq = []
 
+        # Look at detections in each frame
+        for frame in detections:
+            frame_detections = frame['predictions'][0]
 
+            # If more than one pose detected, take two largest poses
+            if len(frame_detections) > 1:
+                frame_detections.sort(key=lambda x: (x['bbox'][0][2] - x['bbox'][0][0]) * (x['bbox'][0][3] - x['bbox'][0][1]), reverse=True)
+                pose1_seq.append(frame_detections[0]['keypoints'])
+                pose2_seq.append(frame_detections[1]['keypoints'])
+            
+            # If only one pose detected, assign to both sequences
+            elif len(frame_detections) == 1:
+                pose1_seq.append(frame_detections[0]['keypoints'])
+                pose2_seq.append(frame_detections[0]['keypoints'])
+            
+            # If none are detected, skip
+            else:
+                pass
+        
+        # Prepare data for LSTM classification
+        lstm_input = self.prepare_lstm_input(pose1_seq, pose2_seq)
+        
+        # Perform LSTM classification
+        predictions = self.lstm_model(lstm_input)
+        
+        return predictions
+    
+    def prepare_lstm_input(X_combatant1, X_combatant2):
+        # Normalize sequences
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        X_combatant1_scaled = scaler.fit_transform(X_combatant1.reshape(-1, X_combatant1.shape[-1])).reshape(X_combatant1.shape)
+        X_combatant2_scaled = scaler.transform(X_combatant2.reshape(-1, X_combatant2.shape[-1])).reshape(X_combatant2.shape)
+        
+        return X_combatant1_scaled, X_combatant2_scaled
+
+    def class_to_classID(self, technique):
+        # 'Osoto Gari'  'Seoi Nage'  'Uchi Mata'
+        one_hot = torch.zeros(self.num_outputs)
+        if technique == 'Osoto Gari':
+            one_hot[0] = 1
+        elif technique == 'Seoi Nage':
+            one_hot[1] = 1
+        elif technique == 'Uchi Mata':
+            one_hot[2] = 1
+
+        return one_hot
+    
+    def classID_to_class(self, predictions):
+        # class dictionary
+        class_mapping_reverse = {
+            0: 'Osoto Gari',
+            1: 'Seoi Nage',
+            2: 'Uchi Mata'
+        }
+
+        # get highest prediction and get technique name
+        predictions = self.softmax(predictions)
+        classID = torch.argmax(predictions).item()
+        return class_mapping_reverse[classID]
+
+        
         # # Loop through video frames
         # for frame in video:
         #     # Perform person detection on the frame
@@ -55,34 +126,7 @@ class JudoTechniqueClassifier(torch.nn.Module):
         #     # Store the poses and features
         #     # poses.append(tracked_poses)
         #     features.append(pose_features)
-
-
-        
-        # Prepare data for LSTM classification
-        lstm_input = self.prepare_lstm_input(features)
-        
-        # Perform LSTM classification
-        predictions = self.lstm_model(lstm_input)
-        
-        # Convert predictions to one-hot encoding
-        one_hot = torch.zeros(self.num_outputs)
-        max_idx = torch.argmax(predictions)
-        one_hot[max_idx] = 1
-        
-        return one_hot
     
-    def extract_features(self, tracked_poses):
-        # Implement feature extraction from tracked poses
-        # This can include calculating joint angles, velocities, etc.
-        # Return a feature vector for each frame
-        pass
-
-    def prepare_lstm_input(self, features):
-        # Implement data preparation for LSTM classification
-        # This may involve padding sequences, converting to tensor, etc.
-        # Return the prepared data
-        pass
-
     def person_detections(self, frame):
         inputs = self.processor(images=frame, return_tensors="pt")
         # print("Shape of input:", inputs['pixel_values'].shape)
