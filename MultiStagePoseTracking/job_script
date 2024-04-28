@@ -14,4 +14,5 @@
 # example:
 module load miniconda
 conda activate dl523
-python deformable_detr/bulk_box.py
+python train.py
+# python deformable_detr/bulk_box.py
