@@ -57,12 +57,12 @@ def obj_assign(frame_list):
         # reshape to 2,1
         # ValueError: could not broadcast input array from shape (2,) into shape (2,1)
         # kf.x[:2] = [x, y]
-        kf.x[:2] = averages
-        kf.x[2:] = np.array([0, 0])
+        kf.x[:2] = np.reshape(averages, (2,1))
+        kf.x[2:] = np.reshape(np.array([0, 0]), (2,1))
 
         pose_frame_data.append({
             'id': unique_id,
-            'kalman_filter': kf,
+            'kalman_filter': kf,    # do we need a filter for each point + average?
             'last_dist': 0,
             'last_obs': 0,
             'keypoints': keypoints,
@@ -94,6 +94,8 @@ def obj_assign(frame_list):
             x = averages[0]
             y = averages[1]
             for pose_idx, pose_data in enumerate(pose_frame_data):
+                # DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future.
+                # Ensure you extract a single element from your array before performing this operation.
                 delta[obj_idx, pose_idx] = np.sqrt((x - pose_data['kalman_filter'].x[0]) ** 2 + (y - pose_data['kalman_filter'].x[1]) ** 2)
 
         # Compute Hungarian assignment
@@ -139,8 +141,8 @@ def obj_assign(frame_list):
                                 [0, 1, 0, 0]])
                 kf.R *= 0.01
                 kf.P *= 1000
-                kf.x[:2] = [x, y]
-                kf.x[2:] = [0, 0]
+                kf.x[:2] = np.reshape(averages, (2,1))
+                kf.x[2:] = np.reshape(np.array([0, 0]), (2,1))
 
                 pose_frame_data.append({
                     'id': unique_id,
@@ -178,7 +180,7 @@ def main():
         det_cat_ids=[0],  # the category id of 'human' class
     )
 
-    detection_generator = inferencer('../../FINAL DATASET/NO_MIRROR/evaluate/Uchi Mata/Uchi Mata_validate_40.mp4', out_dir='poseTracking')
+    detection_generator = inferencer('Test_Video.mp4', out_dir='poseTracking')
     detections = [result for result in detection_generator]
     # print(detections)
 
