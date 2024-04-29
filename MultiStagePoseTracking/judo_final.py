@@ -185,7 +185,7 @@ criterion = nn.CrossEntropyLoss()
 print("\n======================== Training started =========================")
 num_epochs = 5
 verbose=False
-best_model_path = 'pre_pose_KM_judo_classifier.pth'
+best_model_path = 'pre_pose_judo_classifier.pth'
 
 model.train()
 for epoch in range(num_epochs):
