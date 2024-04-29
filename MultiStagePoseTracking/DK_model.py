@@ -301,9 +301,7 @@ class JudoTechniqueClassifier(torch.nn.Module):
 
                     # Spare car, update kalman filter
                     elif delta[obj, car_ind[obj]] == 1000:
-                        print("Spare car, update kalman filter")
-                        print("car")
-                        print(car)
+                        # print("Spare car, update kalman filter")
                         # Get ID
                         car = car_history[car_ind[obj]]
 
@@ -343,15 +341,15 @@ class JudoTechniqueClassifier(torch.nn.Module):
                         car[10] = new_vel
                         car[11] = new_mse
 
-                        print("old keypoints")
-                        print(last_keypoints)
-                        print(last_vel)
-                        print(last_mse)
-                        print("new keypoints")
-                        print(new_keypoints)
-                        print(new_vel)
-                        print(new_mse)
-                        print()
+                        # print("old keypoints")
+                        # print(last_keypoints)
+                        # print(last_vel)
+                        # print(last_mse)
+                        # print("new keypoints")
+                        # print(new_keypoints)
+                        # print(new_vel)
+                        # print(new_mse)
+                        # print()
 
                         # Save update to car history array
                         car_history[car_ind[obj]] = car
@@ -360,6 +358,7 @@ class JudoTechniqueClassifier(torch.nn.Module):
                         # print(test_tracks[car[0]]['averages'])
                         # print("np.array([averages])")
                         # print(np.array([averages]))
+                        averages = np.average(new_keypoints, axis=0)
                         test_tracks[car[0]]['averages'] = np.append(
                             test_tracks[car[0]]['averages'], np.array([averages]), axis=0)
                         test_tracks[car[0]]['keypoints'] = np.append(
@@ -372,9 +371,7 @@ class JudoTechniqueClassifier(torch.nn.Module):
 
                     # Exceeds threshold, create new car
                     elif delta[obj, car_ind[obj]] >= threshold:
-                        print("Exceeds threshold, create new car")
-                        print("car")
-                        print(car)
+                        # print("Exceeds threshold, create new car")
                         # Save new ID to JSON array
                         # frame_dict[str(frame)][obj]['id'] = unique_id
 
@@ -383,14 +380,14 @@ class JudoTechniqueClassifier(torch.nn.Module):
                         averages = np.average(keypoints, axis=0)
                         x = averages[0]
                         y = averages[1]
-                        box = pose['bbox']
+                        box = frame_dict_instance[obj]['bbox']
                         box = box[0]
-                        print("box")
-                        print(box)
+                        # print("box")
+                        # print(box)
                         box_x = np.absolute(box[0] - box[2])
                         box_y = np.absolute(box[1] - box[3])
                         box_size = box_x * box_y
-                        print(box_size)
+                        # print(box_size)
 
                         # Create new car for the ID
                         car_history.append([unique_id,
@@ -406,7 +403,7 @@ class JudoTechniqueClassifier(torch.nn.Module):
                                             np.zeros(keypoints.shape),
                                             # 10 pose keypoints vel prior
                                             big_identity])  # 11 mse keypoints prior
-                        print("append new track")
+                        # print("append new track")
                         test_tracks.append({'track_id': unique_id,
                                             'first_frame': frame['frame_id'],
                                             'averages': np.array([averages]),
