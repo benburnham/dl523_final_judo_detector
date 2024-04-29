@@ -87,6 +87,7 @@ criterion = nn.CrossEntropyLoss()
 print("\n======================== Training started =========================")
 num_epochs = 5
 verbose=False
+best_model_path = 'pre_pose_KM_judo_classifier.pth'
 
 model.train()
 for epoch in range(num_epochs):
@@ -121,6 +122,7 @@ for epoch in range(num_epochs):
 
     train_loss = running_loss / len(train_loader)
     tqdm.write(f"Epoch {epoch+1} complete, Train Loss: {train_loss:.4f}")
+    torch.save(model.state_dict(), best_model_path)
 
 print("\n======================== Training finished ========================\n")
 print("\n========================== Begin Testing ==========================\n")
@@ -147,6 +149,3 @@ with torch.no_grad():
 
 accuracy = correct / total * 100
 print(f"Accuracy: {accuracy:.2f}%")
-
-best_model_path = 'pre_pose_KM_judo_classifier.pth'
-torch.save(model.state_dict(), best_model_path)
