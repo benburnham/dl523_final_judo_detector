@@ -1,32 +1,16 @@
 import torch
 import torch.nn as nn
-import json
 import numpy as np
 import scipy
 import copy
-from mmpose.apis import MMPoseInferencer
 
-from MultiStagePoseTracking.poseTracking.kalman_filter import KMfilter
-
+from poseTracking.kalman_filter import KMfilter
 
 class JudoTechniqueClassifier(torch.nn.Module):
     def __init__(self, hidden_dim, layer_dim, dropout_rate, num_outputs, device):
         super(JudoTechniqueClassifier, self).__init__()
         self.num_outputs = num_outputs
         self.device = device
-
-        # Pose Detection: 
-        # det_model='mmpose/configs/body_2d_keypoint/rtmo/coco/rtmo-l_16xb16-600e_coco-640x640.py'
-        # det_weights='../../rtmo-l_16xb16-600e_coco-640x640-516a421f_20231211.pth'
-        det_model='mmpose/configs/body_2d_keypoint/rtmo/body7/rtmo-l_16xb16-600e_body7-640x640.py',
-        det_weights='../../rtmo-l_16xb16-600e_body7-640x640-b37118ce_20231211.pth',
-        self.pose_detection_model = MMPoseInferencer(
-            pose2d='rtmo',
-            det_model=det_model, 
-            det_weights=det_weights,
-            det_cat_ids=[0],  # the category id of 'human' class
-            device=device
-        )
 
         # LSTM Claasification
         input_dim = 2   # 2 pose sequences, 1 for each combatant
@@ -43,16 +27,8 @@ class JudoTechniqueClassifier(torch.nn.Module):
         # Softmax activation for classification function
         self.softmax = nn.Softmax(dim=1)
     
-    def forward(self, video):
-        # Get poses
-        detection_generator = self.pose_detection_model(video)
-        detections = [result for result in detection_generator]
-        
-        pose1_seq = []
-        pose2_seq = []
-
-        # Look at detections in each frame
-        # change
+    def forward(self, detections):
+        # Get pose sequences
         pose1_seq, pose2_seq = self.obj_assign(detections)
 
         # Prepare LSTM input using pose sequences
@@ -448,58 +424,8 @@ class JudoTechniqueClassifier(torch.nn.Module):
             # for car in car_history:
             # print('id:',car[0],'x:',car[1],'y:',car[2])
 
-        print(test_tracks)
+        # print(test_tracks)
         first_keypoints, second_keypoints = self.top_two_tracks(test_tracks)
 
         # Return JSON array and car data
         return first_keypoints, second_keypoints
-
-
-        
-        # # Look at detections in each frame
-        # for frame in detections:
-        #     frame_detections = frame['predictions'][0]
-
-        #     # If more than one pose detected, take two largest poses
-        #     if len(frame_detections) > 1:
-        #         frame_detections.sort(key=lambda x: (x['bbox'][0][2] - x['bbox'][0][0]) * (x['bbox'][0][3] - x['bbox'][0][1]), reverse=True)
-        #         pose1_seq.append(frame_detections[0]['keypoints'])
-        #         pose2_seq.append(frame_detections[1]['keypoints'])
-            
-        #     # If only one pose detected, assign to both sequences
-        #     elif len(frame_detections) == 1:
-        #         pose1_seq.append(frame_detections[0]['keypoints'])
-        #         pose2_seq.append(frame_detections[0]['keypoints'])
-            
-        #     # If none are detected, skip
-        #     else:
-        #         pass
-    
-    # def person_detections(self, frame):
-    #     inputs = self.processor(images=frame, return_tensors="pt")
-    #     # print("Shape of input:", inputs['pixel_values'].shape)
-    #     outputs = self.person_detection_model(**inputs)
-
-    #     # Convert outputs and keep detections with score > 0.7
-    #     target_sizes = torch.tensor(frame.size)
-    #     results =  self.processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=0.7)[0]
-
-    #     boxes = results["boxes"]
-    #     boxes = [int(i) for i in boxes.tolist()]
-
-    #     return self.find_closest_box(boxes, 1280, 720)
-
-    # def find_closest_box(self, boxes, frame_width, frame_height):
-    #     center_x = frame_width // 2
-    #     center_y = frame_height // 2
-
-    #     box_centers_x = (boxes[:, 0, 0] + boxes[:, 1, 0]) // 2
-    #     box_centers_y = (boxes[:, 0, 1] + boxes[:, 1, 1]) // 2
-
-    #     distances = np.sqrt((box_centers_x - center_x)**2 + (box_centers_y - center_y)**2)
-    #     closest_indices = np.argsort(distances)
-
-    #     closest_box1 = boxes[closest_indices[0]]
-    #     closest_box2 = boxes[closest_indices[1]] if len(boxes) > 1 else None
-
-    #     return closest_box1, closest_box2 
