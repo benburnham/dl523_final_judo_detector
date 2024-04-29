@@ -86,9 +86,9 @@ class JudoTechniqueClassifier(torch.nn.Module):
         second = 0
         first_keypoints = np.zeros(test_tracks[0]['keypoints'].shape)
         second_keypoints = np.zeros(test_tracks[0]['keypoints'].shape)
-        print("test_tracks[i]['total_box_size']")
+        # print("test_tracks[i]['total_box_size']")
         for i in range(len(test_tracks)):
-            print(test_tracks[i]['total_box_size'])
+            # print(test_tracks[i]['total_box_size'])
             if test_tracks[i]['total_box_size'] > first:
                 second = copy.deepcopy(first)
                 second_keypoints = copy.deepcopy(first_keypoints)
@@ -127,23 +127,23 @@ class JudoTechniqueClassifier(torch.nn.Module):
 
                     # change to average pose points x & y to use for calculations
                     keypoints = np.array(pose['keypoints'])
-                    print("keypoints")
-                    print(keypoints)
+                    # print("keypoints")
+                    # print(keypoints)
                     box = pose['bbox']
                     box = box[0]
-                    print("box")
-                    print(box)
+                    # print("box")
+                    # print(box)
                     box_x = np.absolute(box[0] - box[2])
                     box_y = np.absolute(box[1] - box[3])
                     box_size = box_x * box_y
-                    print(box_size)
+                    # print(box_size)
                     averages = np.average(keypoints, axis=0)
                     x = averages[0]
                     y = averages[1]
-                    print("averages")
-                    print(averages)
-                    print(x)
-                    print(y)
+                    # print("averages")
+                    # print(averages)
+                    # print(x)
+                    # print(y)
 
                     # Create new car for the ID
                     car_history.append([unique_id,
@@ -167,13 +167,13 @@ class JudoTechniqueClassifier(torch.nn.Module):
                                         'total_box_size': box_size})
 
                     unique_id += 1  # step ID counter
-                print(car_history)
-                print()
-                print("test_tracks")
-                print(test_tracks)
-                print()
-                print("setup finished")
-                print()
+                # print(car_history)
+                # print()
+                # print("test_tracks")
+                # print(test_tracks)
+                # print()
+                # print("setup finished")
+                # print()
 
             # Evaluate from second frame on
             else:
@@ -190,10 +190,10 @@ class JudoTechniqueClassifier(torch.nn.Module):
                     averages = np.average(keypoints, axis=0)
                     x = averages[0]
                     y = averages[1]
-                    print("averages")
-                    print(averages)
-                    print(x)
-                    print(y)
+                    # print("averages")
+                    # print(averages)
+                    # print(x)
+                    # print(y)
                     for id, car in enumerate(car_history):
                         # compute delta for every object / ID pair
                         delta[obj, id] = np.sqrt((x - car[6][0]) ** 2 + (y - car[6][2]) ** 2)
@@ -213,7 +213,7 @@ class JudoTechniqueClassifier(torch.nn.Module):
 
                 # Compute Hungarian assigment
                 obj_ind, car_ind = scipy.optimize.linear_sum_assignment(delta)
-                print("frame", frame, obj_ind, car_ind)
+                # print("frame", frame, obj_ind, car_ind)
 
                 # Assign IDs based on result
                 for obj in obj_ind:
@@ -223,9 +223,9 @@ class JudoTechniqueClassifier(torch.nn.Module):
                     if delta[obj, car_ind[obj]] < threshold:
                         # Get ID
                         car = car_history[car_ind[obj]]
-                        print("within threshold, tagging with id and updating km filter")
-                        print("car")
-                        print(car)
+                        # print("within threshold, tagging with id and updating km filter")
+                        # print("car")
+                        # print(car)
 
                         # Save ID to JSON array
                         # frame_dict[str(frame)][obj]['id'] = car[0]
@@ -238,7 +238,7 @@ class JudoTechniqueClassifier(torch.nn.Module):
                         box_y = np.absolute(box[1] - box[3])
                         box_size = box_x * box_y
                         averages = np.average(keypoints, axis=0)
-                        print(averages)
+                        # print(averages)
                         x = averages[0]
                         y = averages[1]
 
@@ -273,15 +273,15 @@ class JudoTechniqueClassifier(torch.nn.Module):
                         car[10] = new_vel
                         car[11] = new_mse
 
-                        print("old keypoints")
-                        print(last_keypoints)
-                        print(last_vel)
-                        print(last_mse)
-                        print("new keypoints")
-                        print(new_keypoints)
-                        print(new_vel)
-                        print(new_mse)
-                        print()
+                        # print("old keypoints")
+                        # print(last_keypoints)
+                        # print(last_vel)
+                        # print(last_mse)
+                        # print("new keypoints")
+                        # print(new_keypoints)
+                        # print(new_vel)
+                        # print(new_mse)
+                        # print()
 
                         # Save update to car history array
                         car_history[car_ind[obj]] = car
