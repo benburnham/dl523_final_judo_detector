@@ -369,6 +369,7 @@ class KMJudoTechniqueClassifier(torch.nn.Module):
                         # print(test_tracks[car[0]]['averages'])
                         # print("np.array([averages])")
                         # print(np.array([averages]))
+                        averages = np.average(new_keypoints, axis=0)
                         test_tracks[car[0]]['averages'] = np.append(
                             test_tracks[car[0]]['averages'], np.array([averages]), axis=0)
                         test_tracks[car[0]]['keypoints'] = np.append(
@@ -392,7 +393,7 @@ class KMJudoTechniqueClassifier(torch.nn.Module):
                         averages = np.average(keypoints, axis=0)
                         x = averages[0]
                         y = averages[1]
-                        box = pose['bbox']
+                        box = frame_dict_instance[obj]['bbox']
                         box = box[0]
                         # print("box")
                         # print(box)
