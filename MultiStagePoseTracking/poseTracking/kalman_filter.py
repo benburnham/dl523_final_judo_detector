@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 
 class KMfilter():
@@ -27,7 +29,9 @@ class KMfilter():
     # assuming H = [ 1 0 0 0 ; 0 0 1 0 ] (revisit if necessary)
     # assume cW[t] = 0.5
     def KGC(self, mseprior):
-        self.k = mseprior @ self.H.T @ (np.linalg.inv(self.c_w + self.H @ mseprior @ self.H.T))
+        component = self.c_w + self.H @ mseprior @ self.H.T
+        rand_noise = 0.00001 * np.random.rand( np.shape(component)[0], np.shape(component)[1])
+        self.k = mseprior @ self.H.T @ (np.linalg.inv(component + rand_noise))
         # print("KGC ", self.k)
         return self.k
 

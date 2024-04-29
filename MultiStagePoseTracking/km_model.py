@@ -25,7 +25,7 @@ class KMJudoTechniqueClassifier(torch.nn.Module):
         self.fc = nn.Linear(hidden_dim, num_outputs)
 
         # Softmax activation for classification function
-        self.softmax = nn.Softmax(dim=1)
+        self.softmax = nn.Softmax(dim=-1)
     
     def forward(self, detections):
         # Get pose sequences
@@ -86,7 +86,10 @@ class KMJudoTechniqueClassifier(torch.nn.Module):
         class_mapping_reverse = {0: 'Osoto Gari', 1: 'Seoi Nage', 2: 'Uchi Mata'}
 
         # Get technique name for given prediction
+        print("predictions")
+        print(predictions)
         predictions = self.softmax(predictions)
+        print(predictions)
         classID = torch.argmax(predictions).item()
         return class_mapping_reverse[classID]
 
