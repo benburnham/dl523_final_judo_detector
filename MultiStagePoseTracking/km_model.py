@@ -31,6 +31,10 @@ class KMJudoTechniqueClassifier(torch.nn.Module):
         # Get pose sequences
         pose1_seq, pose2_seq = self.obj_assign(detections)
 
+        # Handle bad videos with no poses
+        if not pose1_seq.any():
+            return None
+
         # Prepare LSTM input using pose sequences
         lstm_input = self.prepare_lstm_input(pose1_seq, pose2_seq)
 
@@ -47,6 +51,7 @@ class KMJudoTechniqueClassifier(torch.nn.Module):
 
         # Linear layer and return predictions
         predictions = self.fc(lstm_out)
+
         return predictions
     
     def prepare_lstm_input(self, pose1_seq, pose2_seq):
@@ -94,6 +99,8 @@ class KMJudoTechniqueClassifier(torch.nn.Module):
         return class_mapping_reverse[classID]
 
     def top_two_tracks(self, test_tracks):
+        if len(test_tracks) < 2:
+            return None, None
         first = 0
         second = 0
         first_keypoints = np.zeros(test_tracks[0]['keypoints'].shape)
