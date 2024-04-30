@@ -88,8 +88,8 @@ if __name__ == "__main__":
     print("\n======================== Training started =========================")
     num_epochs = 5
     verbose=False
-    best_model_path = 'pre_pose_KM_judo_classifier_max.pth'
-    #best_model_path = 'pre_pose_KM_judo_classifier_10e.pth'
+    #best_model_path = 'pre_pose_KM_judo_classifier.pth'
+    best_model_path = 'pre_pose_KM_judo_classifier_max_10e.pth'
 
     model.train()
     for epoch in range(num_epochs):
