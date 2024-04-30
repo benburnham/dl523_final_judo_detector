@@ -1,0 +1,60 @@
+Could not find image processor class in the image processor config or the model config. Loading based on pattern matching with the model's feature extractor configuration. Please open a PR/issue to update `preprocessor_config.json` to use `image_processor_type` instead of `feature_extractor_type`. This warning will be removed in v4.40.
+The `max_size` parameter is deprecated and will be removed in v4.26. Please specify in `size['longest_edge'] instead`.
+Some weights of the model checkpoint at SenseTime/deformable-detr were not used when initializing DeformableDetrForObjectDetection: ['model.backbone.conv_encoder.model.layer1.0.downsample.1.num_batches_tracked', 'model.backbone.conv_encoder.model.layer2.0.downsample.1.num_batches_tracked', 'model.backbone.conv_encoder.model.layer3.0.downsample.1.num_batches_tracked', 'model.backbone.conv_encoder.model.layer4.0.downsample.1.num_batches_tracked']
+- This IS expected if you are initializing DeformableDetrForObjectDetection from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing DeformableDetrForObjectDetection from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Shape of video tensor: (99, 720, 1280, 3)
+Traceback (most recent call last):
+  File "/projectnb/dl523/students/burnham1/Final/dl523_final_judo_detector/MultiStagePoseTracking/deformable_detr/bulk_box.py", line 43, in <module>
+    outputs = model(**inputs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/transformers/models/deformable_detr/modeling_deformable_detr.py", line 1976, in forward
+    outputs = self.model(
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/transformers/models/deformable_detr/modeling_deformable_detr.py", line 1710, in forward
+    features, position_embeddings_list = self.backbone(pixel_values, pixel_mask)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/transformers/models/deformable_detr/modeling_deformable_detr.py", line 483, in forward
+    out = self.conv_encoder(pixel_values, pixel_mask)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/transformers/models/deformable_detr/modeling_deformable_detr.py", line 460, in forward
+    features = self.model(pixel_values) if self.config.use_timm_backbone else self.model(pixel_values).feature_maps
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/timm/models/_features.py", line 282, in forward
+    return list(self._collect(x).values())
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/timm/models/_features.py", line 236, in _collect
+    x = module(x)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/timm/models/resnet.py", line 228, in forward
+    x = self.bn3(x)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/projectnb/cs585/burnham1/.conda/envs/dl523/lib/python3.10/site-packages/transformers/models/deformable_detr/modeling_deformable_detr.py", line 382, in forward
+    return x * scale + bias
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.49 GiB. GPU 0 has a total capacity of 44.53 GiB of which 584.44 MiB is free. Including non-PyTorch memory, this process has 43.95 GiB memory in use. Of the allocated memory 37.24 GiB is allocated by PyTorch, and 6.21 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

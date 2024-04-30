@@ -1,0 +1,45 @@
+'''
+Data Loader JUDO Identifier
+Ben Burnham
+April 21, 2024
+Deep Learning EC523
+'''
+import os
+from torch.utils.data import Dataset, DataLoader
+from torchvision.io import read_video
+
+class VideoDataset(Dataset):
+    def __init__(self, root_dir, mode='train', include_mirror=True):
+        self.root_dir = root_dir
+        self.mode = mode
+        self.include_mirror = include_mirror
+
+        if include_mirror:
+            self.sub_dirs = ['ALL']
+        else:
+            self.sub_dirs = ['NO_MIRROR']
+
+        self.data = []
+        for sub_dir in self.sub_dirs:
+            sub_dir_path = os.path.join(self.root_dir, sub_dir, mode)
+            techniques = os.listdir(sub_dir_path)
+            for technique in techniques:
+                technique_path = os.path.join(sub_dir_path, technique)
+                videos = [os.path.join(technique_path, video) for video in os.listdir(technique_path)]
+                self.data.extend(videos)
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        video_path = self.data[idx]
+        # video, audio, info = read_video(video_path)
+        label = os.path.basename(os.path.dirname(video_path))
+        return video_path, label
+        
+    def get_techniques(self):
+        techniques = set()
+        for video_path in self.data:
+            technique = os.path.basename(os.path.dirname(video_path))
+            techniques.add(technique)
+        return list(techniques)

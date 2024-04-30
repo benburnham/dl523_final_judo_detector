@@ -73,7 +73,7 @@ class JudoTechniqueClassifier(torch.nn.Module):
         self.fc = nn.Linear(hidden_dim, num_outputs)
 
         # Softmax activation for classification function
-        self.softmax = nn.Softmax(dim=1)
+        self.softmax = nn.Softmax(dim=-1)
     
     def forward(self, detections):        
         pose1_seq = []
@@ -148,6 +148,7 @@ class JudoTechniqueClassifier(torch.nn.Module):
 
         # Get technique name for given prediction
         predictions = self.softmax(predictions)
+
         classID = torch.argmax(predictions).item()
         return class_mapping_reverse[classID]
     
@@ -170,8 +171,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
 
 # Initialize model
-model = JudoTechniqueClassifier(hidden_dim=256,
-                                layer_dim=3,
+model = JudoTechniqueClassifier(hidden_dim=512,
+                                layer_dim=4,
                                 dropout_rate=0.5,
                                 num_outputs=3,  # 'Osoto Gari'  'Seoi Nage'  'Uchi Mata'
                                 device=device)
@@ -183,9 +184,9 @@ criterion = nn.CrossEntropyLoss()
 
 # Training loop
 print("\n======================== Training started =========================")
-num_epochs = 5
+num_epochs = 10
 verbose=False
-best_model_path = 'pre_pose_judo_classifier.pth'
+best_model_path = 'pre_pose_judo_classifier4.pth'
 
 model.train()
 for epoch in range(num_epochs):
@@ -234,7 +235,7 @@ with torch.no_grad():
         with open(pose_path[0], 'r') as json_file:
             pose_data = json.load(json_file)
         output = model(pose_data)
-        classID = model.class_to_classID(labels[0])
+        # classID = model.class_to_classID(labels[0])
         # loss = criterion(output.squeeze(0), classID.type_as(output))
 
         total += 1
