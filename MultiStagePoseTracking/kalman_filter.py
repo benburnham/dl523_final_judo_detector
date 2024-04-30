@@ -31,7 +31,10 @@ class KMfilter():
     def KGC(self, mseprior):
         component = self.c_w + self.H @ mseprior @ self.H.T
         rand_noise = 0.00001 * np.random.rand( np.shape(component)[0], np.shape(component)[1])
-        self.k = mseprior @ self.H.T @ (np.linalg.inv(component + rand_noise))
+        try:
+            self.k = mseprior @ self.H.T @ (np.linalg.inv(component + rand_noise))
+        except:
+            return self.k
         # print("KGC ", self.k)
         return self.k
 
