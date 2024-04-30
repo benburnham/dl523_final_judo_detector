@@ -73,8 +73,8 @@ if __name__ == "__main__":
     print(device)
 
     # Initialize model
-    model = KMJudoTechniqueClassifier(hidden_dim=256,
-                                    layer_dim=3,
+    model = KMJudoTechniqueClassifier(hidden_dim=512,
+                                    layer_dim=4,
                                     dropout_rate=0.5,
                                     num_outputs=3,  # 'Osoto Gari'  'Seoi Nage'  'Uchi Mata'
                                     device=device)
@@ -88,8 +88,8 @@ if __name__ == "__main__":
     print("\n======================== Training started =========================")
     num_epochs = 5
     verbose=False
-    #best_model_path = 'pre_pose_KM_judo_classifier.pth'
-    best_model_path = 'pre_pose_KM_judo_classifier_10e.pth'
+    best_model_path = 'pre_pose_KM_judo_classifier.pth'
+    #best_model_path = 'pre_pose_KM_judo_classifier_10e.pth'
 
     model.train()
     for epoch in range(num_epochs):
