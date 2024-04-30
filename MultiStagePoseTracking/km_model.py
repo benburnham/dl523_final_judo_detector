@@ -32,7 +32,7 @@ class KMJudoTechniqueClassifier(torch.nn.Module):
         pose1_seq, pose2_seq = self.obj_assign(detections)
 
         # Handle bad videos with no poses
-        if not pose1_seq.any():
+        if pose1_seq is None:
             return None
 
         # Prepare LSTM input using pose sequences
