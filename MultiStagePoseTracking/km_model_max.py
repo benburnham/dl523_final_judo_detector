@@ -48,8 +48,8 @@ class KMJudoTechniqueClassifier(torch.nn.Module):
         # Dropout and average the sequence
         lstm_out = self.dropout(lstm_out)
         # lstm_out = torch.mean(lstm_out, dim=(0, 1), keepdim=True)
-        lstm_out = torch.max(lstm_out, dim=0, keepdim=True)
-        lstm_out = torch.max(lstm_out, dim=1, keepdim=True)
+        lstm_out, _ = torch.max(lstm_out, dim=0, keepdim=True)
+        lstm_out, _ = torch.max(lstm_out, dim=1, keepdim=True)
 
         # Linear layer and return predictions
         predictions = self.fc(lstm_out)
