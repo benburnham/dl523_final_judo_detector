@@ -392,7 +392,7 @@ class KMJudoTechniqueClassifier(torch.nn.Module):
                         averages = np.average(keypoints, axis=0)
                         x = averages[0]
                         y = averages[1]
-                        box = pose['bbox']
+                        box = frame_dict_instance[obj]['bbox']
                         box = box[0]
                         # print("box")
                         # print(box)
