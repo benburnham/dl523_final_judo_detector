@@ -4,7 +4,7 @@ import numpy as np
 import scipy
 import copy
 
-from poseTracking.kalman_filter import KMfilter
+from kalman_filter import KMfilter
 
 class KMJudoTechniqueClassifier(torch.nn.Module):
     def __init__(self, hidden_dim, layer_dim, dropout_rate, num_outputs, device):
