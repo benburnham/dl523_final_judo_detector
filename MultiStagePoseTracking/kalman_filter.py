@@ -34,6 +34,7 @@ class KMfilter():
         try:
             self.k = mseprior @ self.H.T @ (np.linalg.inv(component + rand_noise))
         except:
+            print("linalg exception")
             return self.k
         # print("KGC ", self.k)
         return self.k
