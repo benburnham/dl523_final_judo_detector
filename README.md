@@ -25,5 +25,7 @@ Note, "judo_final" was last run in a linux environment, and will need 'if __name
 For Pose Detection, Judo_final contains both the model setup and training. 
 For Kalman filter, km_judo_final contains the training and km_model contains the model. 
 
-Other models in their respective folders can be open and run in Google Colab
+The CNN-LSTM model and training is self contained in a single python file, who's only external dependencies are Pytorch, torchvision and av, which are all able to be installed through pip commands. 
+
+The other two models in their respective folders (GRU and 2_1CNN) can be opened and run in Google Colab
 
