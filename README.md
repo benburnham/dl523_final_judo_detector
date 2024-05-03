@@ -6,6 +6,7 @@ Judo is a modern martial art, combat sport, and Olympic event that originated in
 
 Dataset here: https://drive.google.com/drive/folders/1QwVl_AXxCmmvkzQyR24HpUSy3EO5CTU7?usp=sharing
 
+
 The MultiStagePoseTracking folder contains both the "Pose Detection" and "Pose Tracking" models. The Pose Tracking files are all denoted with a "km*"
 To run this, installation of the MMPose moodule is required, as per their website. 
 https://mmpose.readthedocs.io/en/latest/installation.html
@@ -17,6 +18,7 @@ Both the Numpy and Scipy packages are required to run MultiStagePoseTracking
 
 After installation, running either "judo_final" for Pose Detection or "km_judo_final" will run the model. 
 Note, "judo_final" was last run in a linux environment, and will need 'if __name__ == "__main__":' added to run in a Windows environment
+
 
 Other models in their respective folders can be open and run in Google Colab
 
